@@ -161,10 +161,16 @@
         });
 
         const result = await res.json();
-        if (result.status === "success") {
-          resultBox.innerHTML =
-            `✅ Run complete!\nSaved to file: ${result.db_name}\n\nGroups:\n` +
-            result.groups.map(g => `(${g.join(", ")})`).join("\n");
+       if (result.status === "success") {
+  const groupList = result.groups.map(g => `<li>(${g.join(", ")})</li>`).join("");
+
+  resultBox.innerHTML = `
+    <div style="color:green; font-weight:bold;">✅ Run complete!</div>
+    <div style="margin-top:5px;">Saved to file: <code>${result.db_name}</code></div>
+    <div style="margin-top:10px;">Groups:</div>
+    <ul style="margin-left:1em; padding-left:1em;">${groupList}</ul>
+  `;
+}
         } else {
           resultBox.textContent = `❌ Error: ${result.message}`;
         }
