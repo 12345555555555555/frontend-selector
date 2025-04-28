@@ -143,7 +143,9 @@
 
         if (!res.ok) throw new Error(`Server returned ${res.status}`);
         const result = await res.json();
-        const elapsed = ((performance.now() - startTime) / 1000).toFixed(3);
+        //const elapsed = ((performance.now() - startTime) / 1000).toFixed(3);
+        // 后端返回的算法时间（秒）
+        const algoTime = result.solve_time?.toFixed(3) ?? 'N/A';
 
         if (result.status === "success") {
           const groupList = result.groups.map(g => `<li>(${g.map(n => n.toString().padStart(2, "0")).join(", ")})</li>`).join("");
@@ -154,7 +156,7 @@
           resultBox.innerHTML = `
             <div style="color:green;"><b>✅ Run complete!</b></div>
             <div><b>Selected n samples:</b> ${n_list}</div>
-            <div><b>Time elapsed:</b> ${elapsed} s</div>
+            <div><b>Algorithm time:</b> ${algoTime} s</div>
             <div><b>Number of groups:</b> ${count}</div>
             <div>Saved to file: <code>${result.db_name}</code></div>
             <div><b>Groups:</b></div>
