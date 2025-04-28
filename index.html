@@ -110,10 +110,57 @@
       <button onclick="run()">Run Algorithm</button>
     </div>
 
+    <!-- 新增：Saved Runs 列表 -->
+    <div class="form-row" style="margin-top:30px;">
+      <div class="form-group" style="flex:1 1 100%;">
+        <label>Saved Runs</label>
+        <ul id="runsList" style="max-height:200px; overflow:auto; padding-left:20px;"></ul>
+      </div>
+    </div>
+
     <div class="result-area" id="result">Awaiting run...</div>
   </div>
 
   <script>
+    async function loadRuns() {
+      try {
+        const res = await fetch("https://gao-jiawei.onrender.com/runs");
+        const runs = await res.json();
+        const ul = document.getElementById("runsList");
+        ul.innerHTML = runs.map(name =>
+          `<li>
+              <button onclick="previewRun('${name}')"
+                      style="border:none;background:none;color:#007bff;cursor:pointer">
+                  ${name}
+              </button>
+          </li>`
+          ).join("");
+        } catch(e) {
+          console.error("Failed to load runs:", e);
+        }
+    }
+
+    // 点击文件名后，调用 /load 接口并在 result 区域预览
+    async function previewRun(dbName) {
+      const resultBox = document.getElementById("result");
+      resultBox.innerHTML = `<span style="color:blue;">🔄 Loading ${dbName}…</span>`;
+      try {
+        const res = await fetch(`https://gao-jiawei.onrender.com/load/${dbName}`);
+        const groups = await res.json();
+        resultBox.innerHTML = `
+          <div style="color:#333;"><b>Preview: ${dbName}</b></div>
+          <div><b>Number of groups:</b> ${groups.length}</div>
+          <ul>${groups.map(g=>`<li>(${g.join(", ")})</li>`).join("")}</ul>
+        `;
+      } catch(e) {
+        resultBox.innerHTML = `<span style="color:red;">❌ Load failed: ${e.message}</span>`;
+      }
+    
+    }
+
+    // 页面加载完就先拉一遍
+    window.addEventListener("DOMContentLoaded", loadRuns);
+
     async function run() {
       const resultBox = document.getElementById("result");
       resultBox.innerHTML = "<span style='color:blue;'>⏳ Awaiting run...</span>";
@@ -169,6 +216,7 @@
       } catch (e) {
         resultBox.innerHTML = `<span style="color:red;">❌ Request failed: ${e.message}</span>`;
       }
+      await loadRuns();
     }
 
     window.run = run;
